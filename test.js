@@ -7,7 +7,9 @@ const path = require('path');
 
 let server;
 let driver;
-let PORT;
+let testUrl;
+
+describe('Тестирование формы авторизации', function () {
     before(async function () {
         this.timeout(30000); 
 
@@ -19,7 +21,12 @@ let PORT;
                 });
             }
         });
-        await new Promise((resolve) => server.listen(PORT, resolve));
+
+        await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+        const address = server.address();
+        
+        testUrl = `http://127.0.0.1:${address.port}`;
+        console.log(`Тестовый сервер запущен на: ${testUrl}`);
 
         const options = new chrome.Options();
         options.addArguments(
@@ -32,31 +39,13 @@ let PORT;
         driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
     });
 
-
-describe('Тестирование формы авторизации', function () {
-    before(async function () {
-        server = http.createServer((req, res) => {
-            if (req.url === '/' || req.url === '/index.html') {
-                fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
-                    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                    res.end(content);
-                });
-            }
-        });
-        await new Promise((resolve) => server.listen(PORT, resolve));
-
-        const options = new chrome.Options();
-        options.addArguments('--headless', '--no-sandbox', '--disable-dev-shm-usage');
-        driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
-    });
-
     after(async function () {
         if (driver) await driver.quit();
         if (server) await new Promise((resolve) => server.close(resolve));
     });
 
     beforeEach(async function () {
-        await driver.get(`http://localhost:${PORT}`);
+        await driver.get(testUrl);
     });
 
     it('1. Должен отображаться корректный заголовок страницы', async function () {
