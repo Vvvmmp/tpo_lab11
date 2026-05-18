@@ -8,7 +8,35 @@ const path = require('path');
 let server;
 let driver;
 const PORT = 3000;
+    // Перед всеми тестами запускаем локальный сервер и браузер
+    before(async function () {
+        // Увеличиваем таймаут до 30 секунд специально для GitHub Actions
+        this.timeout(30000); 
 
+        // 1. Запуск сервера
+        server = http.createServer((req, res) => {
+            if (req.url === '/' || req.url === '/index.html') {
+                fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
+                    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                    res.end(content);
+                });
+            }
+        });
+        await new Promise((resolve) => server.listen(PORT, resolve));
+
+        // 2. Настройка Selenium с дополнительными флагами стабильности
+        const options = new chrome.Options();
+        options.addArguments(
+            '--headless', 
+            '--no-sandbox', 
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--window-size=1920,1080'
+        );
+        driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
+    });
+
+    
 describe('Тестирование формы авторизации', function () {
     // Перед всеми тестами запускаем локальный сервер и браузер
     before(async function () {
