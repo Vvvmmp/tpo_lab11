@@ -1,0 +1,27 @@
+{
+  "name": "lab11",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha test.js --timeout 15000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vvvmmp/tpo_lab11.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Vvvmmp/tpo_lab11/issues"
+  },
+  "homepage": "https://github.com/Vvvmmp/tpo_lab11#readme",
+  "devDependencies": {
+    "assert": "^2.1.0",
+    "mocha": "^11.7.5",
+    "selenium-webdriver": "^4.44.0"
+  }
+}
