@@ -1,0 +1,66 @@
+name: UI Tests & GitHub Pages Deploy
+
+on:
+  push:
+    branches: [ main, dev, fix-ui-tests ]
+  pull_request:
+    branches: [ main, dev ]
+
+# Разрешения, необходимые для публикации артефактов на GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # ЗАДАЧА 1: Запуск автоматизированных UI-тестов
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Проверка репозитория
+      uses: actions/checkout@v4
+
+    - name: Установка Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Установка зависимостей
+      run: npm install
+
+    - name: Запуск автотестов
+      run: npm test
+
+  # ЗАДАЧА 2: Деплой на GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    # Деплой запустится ТОЛЬКО если задача 'test' завершилась успешно
+    needs: test
+    
+    # Деплой выполнится ТОЛЬКО при пуше или слиянии в ветку main
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Проверка репозитория
+      uses: actions/checkout@v4
+
+    - name: Настройка GitHub Pages
+      uses: actions/configure-pages@v5
+
+    - name: Загрузка статических файлов формы
+      uses: actions/upload-pages-artifact@v3
+      with:
+        # Указываем путь к папке с index.html (в данном случае корень проекта)
+        path: '.'
+
+    - name: Публикация на GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
